@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: busybox-nginx
+  labels:
+    app: busybox-nginx
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: busybox-nginx
+  template:
+    metadata:
+      labels:
+        app: busybox-nginx
+    spec:
+      volumes:
+        - name: storage
+          emptyDir: {}
+        - name: nginx-config
+          configMap:
+            name: nginx-config
+      containers:
+        - name: busybox
+          image: busybox:glibc
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: storage
+              mountPath: /storage
+          command: ["/bin/sh"]
+          args:
+            - "-c"
+            - |
+              while true; do
+                date >> /storage/time.log;
+                sleep 5;
+              done
+        - name: nginx
+          image: nginx:latest
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - name: storage
+              mountPath: /storage
+            - name: nginx-config
+              mountPath: /etc/nginx/conf.d
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              nginx -g 'daemon off;'
