@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: multitool-nginx-ingress
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - kubernetes.docker.internal
+      secretName: tls-secret
+  rules:
+    - host: kubernetes.docker.internal
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: multitool-nginx-service
+                port:
+                  number: 80
