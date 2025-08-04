@@ -1,0 +1,46 @@
+replicaCount: 2
+
+image:
+  repository: nginx
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  name: nginx
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  path: /
+  pathType: Prefix
+  servicePort: 80
+  annotations: {}
+  hosts:
+    - host: ""
+      paths:
+        - /
+
+configMap:
+  defaultConf: |
+    server {
+        listen 8080 default_server;
+        listen [::]:8080 default_server;
+        server_name _;
+        root /usr/share/nginx/html;
+        index index.html;
+        location / {
+            try_files $uri $uri/ =404;
+        }
+    }
+
+  indexHtml: |
+    <!DOCTYPE html>
+    <html>
+    <head>
+        <title>Page From Config Map</title>
+    </head>
+    <body>
+        <h1>Hello from Config Map HTML!</h1>
+    </body>
+    </html>
